@@ -486,19 +486,30 @@ def train_and_test():
     train_examples = create_dspy_examples(TRAINING_EXAMPLES)
     print(f"Training examples: {len(train_examples)}")
 
-    from dspy.teleprompt import BootstrapFewShot
-
-    optimizer = BootstrapFewShot(
-        metric=simple_metric,
-        max_bootstrapped_demos=5,
-        max_labeled_demos=5,
-        max_rounds=1
-    )
+    import os
+    CACHE_FILE = "brutal_feedback_optimized.json"
 
     unoptimized = BrutalFeedbackModule()
 
-    print("\nOptimizing...")
-    optimized = optimizer.compile(unoptimized, trainset=train_examples)
+    if os.path.exists(CACHE_FILE):
+        print(f"\nLoading cached optimized model from {CACHE_FILE}")
+        optimized = BrutalFeedbackModule()
+        optimized.load(CACHE_FILE)
+    else:
+        from dspy.teleprompt import BootstrapFewShot
+
+        optimizer = BootstrapFewShot(
+            metric=simple_metric,
+            max_bootstrapped_demos=5,
+            max_labeled_demos=5,
+            max_rounds=1
+        )
+
+        print("\nOptimizing...")
+        optimized = optimizer.compile(unoptimized, trainset=train_examples)
+
+        print(f"\nSaving optimized model to {CACHE_FILE}")
+        optimized.save(CACHE_FILE)
 
     print("\n" + "="*80)
     print("COMPREHENSIVE TESTING - {} test cases".format(len(COMPREHENSIVE_TESTS)))

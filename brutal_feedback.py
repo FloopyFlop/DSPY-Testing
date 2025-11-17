@@ -234,31 +234,41 @@ def train_brutal_feedback():
     print(f"\nTraining examples: {len(train_examples)}")
     print(f"Validation examples: {len(val_examples)}")
 
-    # Create evaluator (uses large model)
-    evaluator = LLMAsJudge(evaluator_lm=large_lm)
+    import os
+    CACHE_FILE = "brutal_feedback_llm_judge.json"
 
-    # Create optimizer
-    from dspy.teleprompt import BootstrapFewShotWithRandomSearch
+    if os.path.exists(CACHE_FILE):
+        print(f"\nLoading cached optimized model from {CACHE_FILE}")
+        compiled_module = BrutalFeedbackModule()
+        compiled_module.load(CACHE_FILE)
+    else:
+        # Create evaluator (uses large model)
+        evaluator = LLMAsJudge(evaluator_lm=large_lm)
 
-    optimizer = BootstrapFewShotWithRandomSearch(
-        metric=evaluator,
-        max_bootstrapped_demos=6,
-        max_labeled_demos=6,
-        num_candidate_programs=8,
-        num_threads=1
-    )
+        # Create optimizer
+        from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 
-    print("\nStarting optimization...")
-    print("Small LM generates feedback -> Large LM evaluates quality")
-    print()
+        optimizer = BootstrapFewShotWithRandomSearch(
+            metric=evaluator,
+            max_bootstrapped_demos=6,
+            max_labeled_demos=6,
+            num_candidate_programs=8,
+            num_threads=1
+        )
 
-    # Compile/optimize
-    compiled_module = optimizer.compile(
-        BrutalFeedbackModule(),
-        trainset=train_examples
-    )
+        print("\nStarting optimization...")
+        print("Small LM generates feedback -> Large LM evaluates quality")
+        print()
 
-    print("\nOptimization complete!")
+        # Compile/optimize
+        compiled_module = optimizer.compile(
+            BrutalFeedbackModule(),
+            trainset=train_examples
+        )
+
+        print("\nOptimization complete!")
+        print(f"Saving optimized model to {CACHE_FILE}")
+        compiled_module.save(CACHE_FILE)
 
     # Evaluate
     print("\n" + "="*80)
