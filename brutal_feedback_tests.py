@@ -10,12 +10,13 @@ from brutal_feedback import (
     TRAINING_EXAMPLES, create_dspy_examples
 )
 
-# Use single model
+# Use single model with HIGH temperature for maximum chaos/creativity
 model = dspy.LM(
     model='ollama/qwen2.5:0.5b',
     api_base='http://localhost:11434',
     api_key='',
-    temperature=2
+    temperature=0.9,
+    max_tokens=200
 )
 
 dspy.configure(lm=model)
@@ -26,37 +27,37 @@ COMPREHENSIVE_TESTS = [
     # Code quality (15 tests)
     {
         "content": "if x == True:\n    return True\nelse:\n    return False",
-        "context": "What's wrong here?",
+        "context": "Is this good code?",
         "category": "code_smell"
     },
     {
-        "content": "def process(data):\n    # TODO: implement\n    pass",
-        "context": "Review this function",
+        "content": "def process(data):\n    # TODO: implement this function later when I have time\n    pass",
+        "context": "Ready for production?",
         "category": "incomplete"
     },
     {
-        "content": "import *\nfrom module import *",
-        "context": "Imports review",
+        "content": "from django.db import *\nfrom flask import *\nimport pandas as pd, numpy as np, sklearn, tensorflow as tf",
+        "context": "Are my imports okay?",
         "category": "bad_practice"
     },
     {
-        "content": "x = 1\ny = 2\nz = 3\na = 4\nb = 5",
-        "context": "Variable naming",
+        "content": "a = 1\nb = 2\ndata = 3\nstuff = 4\nthing = 5\nvar = 6\ntemp = 7",
+        "context": "How's my variable naming?",
         "category": "naming"
     },
     {
-        "content": "def calculate(a, b, c, d, e, f, g, h, i, j):\n    return a + b + c + d + e + f + g + h + i + j",
-        "context": "Function signature review",
+        "content": "def calculate(a, b, c, d, e, f, g, h, i, j, k, l):\n    return a + b + c + d + e + f + g + h + i + j + k + l",
+        "context": "This function adds numbers. Thoughts?",
         "category": "code_smell"
     },
     {
-        "content": "# God object with 50 methods\nclass Manager:\n    def do_everything(self): pass",
-        "context": "Class design",
+        "content": "class Manager:\n    def do_everything(self):\n        pass\n    def handle_all_cases(self):\n        pass\n    # 48 more methods...",
+        "context": "My utility class is so useful!",
         "category": "bad_practice"
     },
     {
-        "content": "global_state = {}\ndef update():\n    global global_state\n    global_state['x'] = 5",
-        "context": "State management",
+        "content": "GLOBAL_CONFIG = {}\ndef update_config():\n    global GLOBAL_CONFIG\n    GLOBAL_CONFIG['data'] = fetch_from_db()",
+        "context": "How should I manage state?",
         "category": "code_smell"
     },
     {
@@ -451,29 +452,45 @@ def simple_metric(example, prediction, trace=None) -> float:
 
     score = 0.0
 
-    # Must have substantive feedback (15+ words)
+    # Must have substantive feedback (20+ words for proper roasting)
     word_count = len(feedback.split())
-    if word_count >= 15:
+    if word_count >= 30:
         score += 0.3
-    elif word_count >= 8:
+    elif word_count >= 15:
         score += 0.15
 
-    # Bonus for honest/direct language
-    honest_words = ['wrong', 'bad', 'terrible', 'avoid', 'never', 'stop', 'don\'t', 'no']
-    if any(word in feedback.lower() for word in honest_words):
-        score += 0.2
+    # MAJOR bonus for savage/brutal language
+    savage_words = ['terrible', 'awful', 'nightmare', 'disaster', 'cursed', 'war crime',
+                    'insane', 'embarrassing', 'unacceptable', 'idiotic', 'ridiculous',
+                    'garbage', 'trash', 'pathetic', 'useless', 'pointless', 'spectacular',
+                    'dying', 'dead', 'kill', 'destroy', 'crush', 'murder']
+    savage_count = sum(1 for word in savage_words if word in feedback.lower())
+    score += min(savage_count * 0.2, 0.6)
 
-    # Bonus for specific suggestions
-    action_words = ['use', 'try', 'replace', 'change', 'instead', 'should']
+    # Bonus for sarcasm/humor indicators
+    humor_phrases = ['congratulations', 'wonderful', 'let me guess', 'oh wait',
+                     'sure, and', 'found the person', 'tell me you', 'bold strategy',
+                     'ah yes', 'incredible', 'welcome to', 'called, they want',
+                     'participation trophy', 'at its finest', 'screams']
+    humor_count = sum(1 for phrase in humor_phrases if phrase in feedback.lower())
+    score += min(humor_count * 0.2, 0.5)
+
+    # Bonus for specific technical criticism
+    action_words = ['use', 'replace', 'delete', 'rewrite', 'instead', 'just write']
     if any(word in feedback.lower() for word in action_words):
-        score += 0.3
-
-    # Bonus for explaining why
-    reasoning_words = ['because', 'since', 'will cause', 'leads to', 'results in']
-    if any(word in feedback.lower() for word in reasoning_words):
         score += 0.2
 
-    return min(score, 1.0)
+    # Bonus for analogies/comparisons (makes it funnier)
+    analogy_words = ['like', 'equivalent', 'same energy as', 'similar to']
+    if any(word in feedback.lower() for word in analogy_words):
+        score += 0.15
+
+    # PENALTY for being too polite/boring
+    polite_words = ['consider', 'might want to', 'could be', 'perhaps', 'maybe']
+    politeness_penalty = sum(0.1 for word in polite_words if word in feedback.lower())
+    score -= min(politeness_penalty, 0.3)
+
+    return max(0.0, min(score, 1.0))
 
 
 def train_and_test():
