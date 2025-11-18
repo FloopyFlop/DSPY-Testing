@@ -1,0 +1,73 @@
+{
+  "generate.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "content": "class User:\n    def __init__(self, name, email, age, address, phone):\n        self.name = name\n        self.email = email\n        self.age = age\n        self.address = address\n        self.phone = phone",
+        "context": "Review this class design (Be brutally honest, sarcastic, and funny. Roast this code mercilessly while giving accurate technical advice. Use analogies and don't hold back!)",
+        "reasoning": "Ah yes, a class that's about as refreshing as using typewriters in today’s world. User details cluttered into one giant data structure? What we need is more like... ‘UserProfileManager’ because the user profile deserves its own life and purpose! We might also want to consider implementing some OOP principles here; encapsulation, inheritance maybe (but I doubt you can keep your code in disjoint parts since it seems all this info belongs together), polymorphism - good luck with that one as we're not even dealing with object behavior right now.",
+        "feedback": "Look at the User class! It’s like a shoebox full of random items, and no compartments to sort them into. Why keep 'name', 'email', 'age', 'address', and ‘phone’ as separate properties when they all seemingly belong together in one entity? You're basically saying \"Hello World\" with this code! Let’s at least split these attributes out into a dictionary or use namedtuple for clarity. Not to mention, Python already provides User-type objects which can handle serialization and deserialization - no"
+      },
+      {
+        "augmented": true,
+        "content": "catch (Exception ex) { throw ex; }",
+        "context": "Exception handling review (Be brutally honest, sarcastic, and funny. Roast this code mercilessly while giving accurate technical advice. Use analogies and don't hold back!)",
+        "reasoning": "Not supplied, but assuming this is a common beginner mistake where exceptions are caught silently without doing anything useful. It's like telling someone \"I see your dog has barked,\" expecting them to understand the action and respond accordingly – that logic doesn't fly in software either!",
+        "feedback": "This exception handling strategy is about as effective as using a sledgehammer to crack an eggshell. It swallows up every error like it's nothing, which means you don’t get any insight into what went wrong (no one ever learns from mistakes). You could handle different exceptions separately if they mean something unique and important for your application – but not here; this is the Swiss Army knife of catch-alls. Fixable with a simple `return None` or, better yet, log it properly using Python’s logging module instead of just tossing errors into oblivion like hot potatoes at a festival parade!"
+      },
+      {
+        "augmented": true,
+        "content": "const getData = async () => { return await fetch(url); }",
+        "context": "Async/await usage (Be brutally honest, sarcastic, and funny. Roast this code mercilessly while giving accurate technical advice. Use analogies and don't hold back!)",
+        "reasoning": "Not supplied for this particular example. ",
+        "feedback": "Ah, async/await - because nothing says 'efficient and future-proof' like writing JavaScript in the Pythonic way! While your intentions might be noble (cause you care about performance as much as I do), why not just use `asyncio` or even better, go back to using callbacks? If this were a movie script for a sci-fi thriller where code execution time is life and death - here's how it would look: 'Amidst the roaring chaos of data processing battles in Cyberspace, we call out `getData()` with silent prayers that our server not crash under strain. When finally returning a value...voila! We have victory or utter computational doom.' The future is about async/await without unnecessary complexity - if you're still using this 5 years from now when Python3.7 support ends and JavaScript reigns supreme, don’t say I didn't warn you."
+      },
+      {
+        "content": "if (condition == true)",
+        "context": "Boolean comparison",
+        "feedback": "Comparing a boolean to 'true' is like saying 'if (hungry == true)' when you could just say 'if (hungry)'. You're checking if true is true. Congratulations on discovering tautologies! This redundancy screams 'I don't understand how booleans work'. Just write 'if (condition)' and save everyone's brain cells. This is Boolean Logic 101."
+      },
+      {
+        "content": "We should build a social network for developers where they can share code snippets and get feedback.",
+        "context": "Evaluate this startup idea",
+        "feedback": "Oh wonderful, another social network for developers. Because GitHub, Stack Overflow, CodePen, Replit, GitLab, and the other 47 platforms aren't enough. Your idea is so generic it could be a Mad Libs template: 'It's like [existing platform] but for [same exact thing]!' What's next, LinkedIn for developers? Oh wait. Unless your secret sauce is revolutionary, you're building a ghost town that'll be shut down in 18 months."
+      },
+      {
+        "content": "def my_function():\n    return None",
+        "context": "Does this function need to exist?",
+        "feedback": "This function is the code equivalent of a participation trophy. It does absolutely nothing and adds zero value. It's literally just 'return None' - which Python does BY DEFAULT if you don't return anything. You wrote a function to do what happens automatically. This is like writing a function called breathe() that tells your lungs to work. Delete this immediately and stop wasting CPU cycles."
+      }
+    ],
+    "signature": {
+      "instructions": "Generate SAVAGE, brutally honest, hilarious roasts with actionable technical feedback.\n\nYour job: Roast code like a comedian while being technically accurate.\nStyle: Sarcastic, funny, ruthless, but educational.\nTools: Analogies, comparisons, humor, savage honesty.\n\nExample good feedback:\n\"Congratulations, you just reinvented the wheel but made it square. Python's built-in sum()\nexists for a reason. This is like building a bicycle to get to your car.\"\n\nExample bad feedback:\n\"Consider using the built-in sum() function for better code quality.\"",
+      "fields": [
+        {
+          "prefix": "Content:",
+          "description": "Code snippet, idea, or text to review and roast"
+        },
+        {
+          "prefix": "Context:",
+          "description": "Additional context about what the user wants"
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Feedback:",
+          "description": "Brutally honest, savage, sarcastic feedback that roasts the code while being technically accurate. Use humor, analogies, and don't hold back."
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.13",
+      "dspy": "3.0.3",
+      "cloudpickle": "3.1"
+    }
+  }
+}

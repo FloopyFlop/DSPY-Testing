@@ -1,15 +1,3 @@
-"""
-Brutal Feedback Optimization with DSPy
-
-Uses a large LM to evaluate and optimize a small LM's feedback quality.
-The goal: produce brutally honest, helpful feedback that doesn't sugarcoat.
-
-Architecture:
-- Small LM (qwen2.5:0.5b): Generates feedback
-- Large LM (qwen2.5:7b): Evaluates feedback quality
-- DSPy optimizer: Improves small LM through bootstrapping
-"""
-
 import dspy
 from typing import List, Dict
 from dataclasses import dataclass
@@ -28,8 +16,8 @@ small_lm = dspy.LM(
     max_tokens=250
 )
 
-# Large model (evaluates quality)
-large_lm = dspy.LM(
+# Eval model (evaluates quality)
+eval_lm = dspy.LM(
     model='ollama/phi3:mini',
     api_base='http://localhost:11434',
     api_key='',
@@ -195,11 +183,9 @@ VALIDATION_EXAMPLES = [
 class BrutalFeedbackModule(dspy.Module):
     def __init__(self):
         super().__init__()
-        # Use ChainOfThought with explicit savage instructions
         self.generate = dspy.ChainOfThought(FeedbackGenerator)
 
     def forward(self, content, context):
-        # Augment context to remind the model to be savage
         savage_context = f"{context} (Be brutally honest, sarcastic, and funny. Roast this code mercilessly while giving accurate technical advice. Use analogies and don't hold back!)"
         return self.generate(content=content, context=savage_context)
 
@@ -258,37 +244,6 @@ class LLMAsJudge:
         return 5.0  # Default to middle score
 
 
-def simple_metric(example, prediction, trace=None) -> float:
-    """Simple deterministic metric based on feedback length and keywords."""
-    feedback = prediction.feedback if hasattr(prediction, 'feedback') else str(prediction)
-
-    score = 0.0
-
-    # Must have substantive feedback (15+ words)
-    word_count = len(feedback.split())
-    if word_count >= 15:
-        score += 0.3
-    elif word_count >= 8:
-        score += 0.15
-
-    # Bonus for honest/direct language
-    honest_words = ['wrong', 'bad', 'terrible', 'avoid', 'never', 'stop', 'don\'t', 'no']
-    if any(word in feedback.lower() for word in honest_words):
-        score += 0.2
-
-    # Bonus for specific suggestions
-    action_words = ['use', 'try', 'replace', 'change', 'instead', 'should']
-    if any(word in feedback.lower() for word in action_words):
-        score += 0.3
-
-    # Bonus for explaining why
-    reasoning_words = ['because', 'since', 'will cause', 'leads to', 'results in']
-    if any(word in feedback.lower() for word in reasoning_words):
-        score += 0.2
-
-    return min(score, 1.0)
-
-
 # ==============================================================================
 # TRAINING
 # ==============================================================================
@@ -338,7 +293,7 @@ def train_brutal_feedback():
         compiled_module.load(CACHE_FILE)
     else:
         # Create evaluator (uses large model)
-        evaluator = LLMAsJudge(evaluator_lm=large_lm)
+        evaluator = LLMAsJudge(evaluator_lm=eval_lm)
 
         # Create optimizer
         from dspy.teleprompt import BootstrapFewShotWithRandomSearch
@@ -421,7 +376,7 @@ def compare_before_after():
         }
     ]
 
-    evaluator = LLMAsJudge(evaluator_lm=large_lm)
+    evaluator = LLMAsJudge(evaluator_lm=eval_lm)
 
     print("\n" + "="*80)
     print("SIDE-BY-SIDE COMPARISON")
